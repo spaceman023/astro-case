@@ -1,0 +1,14 @@
+---
+import PocketBase from 'pocketbase';
+const pb = new PocketBase('http://127.0.0.1:8090');
+
+export interface Params {
+  id: string;
+}
+const { person } = Astro.params;
+const p = await pb.collection('people').getFirstListItem(`id="${person}"`, {
+  expand: 'relField1,relField2.subRelField',
+});
+---
+
+<h1>{p.first_name} {p.last_name}</h1>

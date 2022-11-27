@@ -1,0 +1,18 @@
+---
+import PocketBase from 'pocketbase';
+import CaseEvents from '../components/react/CaseEvents';
+const pb = new PocketBase('http://127.0.0.1:8090');
+
+export interface Params {
+  id: string;
+}
+const { id } = Astro.params;
+const record = await pb.collection('cases').getFirstListItem('docket="2020-0101"', {
+  expand: 'events',
+});
+const events = await pb.collection('events').getList(1, 200, { filter: `case="${record.id}"` });
+---
+
+<div style="height:100vh; width:100vw; overflow:scroll;">
+  <CaseEvents evs={events.items} client:load />
+</div>
