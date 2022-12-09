@@ -1,9 +1,6 @@
 ---
 import PocketBase from 'pocketbase';
-import CaseInfo from '../components/react/CaseInfo';
-import CaseEvents from '../components/react/CaseEvents';
-import CaseCharges from '../components/react/CaseCharges';
-import CaseNotes from '../components/react/CaseNotes';
+import Case from '../components/react/Case.jsx';
 const pb = new PocketBase('http://127.0.0.1:8090');
 
 export interface Params {
@@ -12,37 +9,16 @@ export interface Params {
 const { id } = Astro.params;
 ---
 
-<div class="container">
-  <div class="dashboard-section">
-    <CaseCharges caseId={id} client:load />
-  </div>
-  <div class="dashboard-section">
-    <CaseEvents caseId={id} client:load />
-  </div>
-</div>
-
-<div class="container">
-  <div class="dashboard-section">
-    <CaseNotes caseId={id} client:load />
-  </div>
-  <div class="dashboard-section">
-    <CaseInfo client:load />
-  </div>
+<div>
+  <Case id={id} client:load />
 </div>
 
 <style>
-  .dashboard-section {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 50vw;
-    overflow: scroll;
-  }
   .container {
     display: flex;
-    flex-direction: row;
-    height: 50vh;
-    width: 100vw;
-    overflow: scroll;
+    flex-direction: column;
+    height: 100%;
+    width: 80vw;
+    margin: 10px;
   }
 </style>
