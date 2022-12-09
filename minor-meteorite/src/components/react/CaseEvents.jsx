@@ -1,31 +1,47 @@
-import * as React from 'react';
-import { DataGrid } from '@mui/x-data-grid';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import React, { useState, useEffect } from 'react';
+//import List, ListItem and ListItemText from mui
 
-export default function CaseEvents({ evs }) {
-  const [events, setEvents] = React.useState([]);
-  React.useEffect(() => {
-    const events = [];
-    evs.forEach((e) => {
-      events.push({
-        id: e.id,
-        eventId: e.id,
-        eventName: e.name,
-        eventType: e.type,
-        eventDate: e.date,
-        eventDescription: e.description,
-        eventStatus: e.status,
-      });
-    });
-    setEvents(events);
-  }, []);
-
-  const cols = [
-    { field: 'eventId', headerName: 'ID', flex: 1 },
-    { field: 'eventName', headerName: 'Name', flex: 1 },
-    { field: 'eventType', headerName: 'Type', flex: 1 },
-    { field: 'eventDate', headerName: 'Date', flex: 1 },
-    { field: 'eventDescription', headerName: 'Description', flex: 1 },
-    { field: 'eventStatus', headerName: 'Status', flex: 1 },
+const CaseEvents = ({ caseId }) => {
+  const dummyData = [
+    {
+      id: 1,
+      event_type: 'Court hearing',
+      event_date: '2022-12-10',
+      event_location: 'San Francisco, CA',
+    },
+    {
+      id: 2,
+      event_type: 'Meeting with lawyer',
+      event_date: '2022-12-12',
+      event_location: 'San Francisco, CA',
+    },
+    {
+      id: 3,
+      event_type: 'Mediation',
+      event_date: '2022-12-15',
+      event_location: 'San Francisco, CA',
+    },
   ];
-  return <DataGrid rows={events} columns={cols} pageSize={5} checkboxSelection />;
-}
+  const [events, setEvents] = useState(dummyData);
+  // useEffect(() => {
+  //   // Fetch all of the events for the given case
+  //   fetch(`/api/cases/${caseId}/events`)
+  //     .then((response) => response.json())
+  //     .then((data) => setEvents(data));
+  // }, [caseId]);
+
+  return (
+    <List>
+      {events.map((event) => (
+        <ListItem key={event.id}>
+          <ListItemText primary={event.event_type} secondary={`${event.event_date} - ${event.event_location}`} />
+        </ListItem>
+      ))}
+    </List>
+  );
+};
+
+export default CaseEvents;
