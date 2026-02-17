@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nickelpack/nsis-tauri-utils/main/crates/tauri-utils/schemas/capability.schema.json",
+  "identifier": "default",
+  "description": "Default permissions for the Go on the Go app",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}
