@@ -1,12 +1,7 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
+  site: 'https://spaceman023.github.io',
+  base: '/astro-case',
   server: { port: 3000 },
-  vite: {
-    server: {
-      proxy: {
-        '/api': 'http://localhost:8080',
-      },
-    },
-  },
 });

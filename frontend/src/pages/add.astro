@@ -29,38 +29,25 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <script>
+    import { addRestroom, getBase } from '../scripts/store';
+
+    const base = getBase();
     const form = document.getElementById('add-form') as HTMLFormElement;
     const msg = document.getElementById('form-message')!;
 
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
       const data = new FormData(form);
 
-      const body = {
+      const restroom = addRestroom({
         name: data.get('name') as string,
         address: data.get('address') as string,
         latitude: parseFloat(data.get('latitude') as string) || 0,
         longitude: parseFloat(data.get('longitude') as string) || 0,
-      };
+      });
 
-      try {
-        const res = await fetch('/api/restrooms', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text);
-        }
-
-        const restroom = await res.json();
-        msg.innerHTML = `<p style="color: #38a169;">Restroom added! <a href="/restroom?id=${restroom.id}" style="color: #2b6cb0;">View it &rarr;</a></p>`;
-        form.reset();
-      } catch (err: any) {
-        msg.innerHTML = `<p style="color: #e53e3e;">Error: ${err.message}</p>`;
-      }
+      msg.innerHTML = `<p style="color: #38a169;">Restroom added! <a href="${base}restroom?id=${restroom.id}" style="color: #2b6cb0;">View it &rarr;</a></p>`;
+      form.reset();
     });
   </script>
 </Layout>
