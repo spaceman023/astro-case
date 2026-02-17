@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Browse Restrooms">
+  <h1 style="margin-bottom: 1rem; font-size: 1.75rem;">Public Restrooms Near You</h1>
+  <p style="color: #718096; margin-bottom: 1.5rem;">Find and rate public restrooms in your area.</p>
+
+  <div id="restroom-list">
+    <div class="card" style="text-align: center; color: #a0aec0; padding: 3rem;">
+      Loading restrooms...
+    </div>
+  </div>
+
+  <script>
+    import { listRestrooms, seedSampleData, getBase } from '../scripts/store';
+
+    const base = getBase();
+    seedSampleData();
+
+    const container = document.getElementById('restroom-list')!;
+    const restrooms = listRestrooms();
+
+    if (restrooms.length === 0) {
+      container.innerHTML = `
+        <div class="card" style="text-align: center; padding: 3rem;">
+          <p style="color: #a0aec0; margin-bottom: 1rem;">No restrooms added yet.</p>
+          <a href="${base}add" class="btn">Add the First Restroom</a>
+        </div>
+      `;
+    } else {
+      container.innerHTML = restrooms.map(r => `
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+              <h2 style="font-size: 1.2rem; margin-bottom: 0.25rem;">
+                <a href="${base}restroom?id=${r.id}" style="color: #2b6cb0; text-decoration: none;">${r.name}</a>
+              </h2>
+              <p style="color: #718096; font-size: 0.9rem;">${r.address}</p>
+            </div>
+            <div style="text-align: right;">
+              ${r.rating_count > 0 ? `
+                <div class="stars">${'★'.repeat(Math.round(r.avg_overall))}${'☆'.repeat(5 - Math.round(r.avg_overall))}</div>
+                <p style="color: #a0aec0; font-size: 0.8rem;">${r.rating_count} rating${r.rating_count !== 1 ? 's' : ''}</p>
+              ` : `
+                <p style="color: #a0aec0; font-size: 0.85rem;">No ratings yet</p>
+              `}
+            </div>
+          </div>
+          ${r.rating_count > 0 ? `
+            <div style="margin-top: 0.75rem;">
+              <span class="rating-badge">Clean: ${r.avg_cleanliness.toFixed(1)}</span>
+              <span class="rating-badge">Access: ${r.avg_accessibility.toFixed(1)}</span>
+              <span class="rating-badge">Amenities: ${r.avg_amenities.toFixed(1)}</span>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+  </script>
+</Layout>

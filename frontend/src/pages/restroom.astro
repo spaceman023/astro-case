@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Restroom Details">
+  <div id="restroom-detail">
+    <div class="card" style="text-align: center; color: #a0aec0; padding: 3rem;">
+      Loading...
+    </div>
+  </div>
+
+  <script>
+    import { getRestroomById, addRating, getBase } from '../scripts/store';
+
+    const base = getBase();
+    const container = document.getElementById('restroom-detail')!;
+    const params = new URLSearchParams(window.location.search);
+    const restroomId = params.get('id');
+
+    if (!restroomId) {
+      container.innerHTML = `
+        <div class="card" style="text-align: center; color: #e53e3e; padding: 2rem;">
+          No restroom ID provided. <a href="${base}" style="color: #2b6cb0;">Go back to browse</a>.
+        </div>
+      `;
+    } else {
+      renderDetail();
+    }
+
+    function renderDetail() {
+      const r = getRestroomById(restroomId!);
+
+      if (!r) {
+        container.innerHTML = `
+          <div class="card" style="text-align: center; color: #e53e3e; padding: 2rem;">
+            Restroom not found. <a href="${base}" style="color: #2b6cb0;">Go back</a>.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="card">
+          <a href="${base}" style="color: #2b6cb0; font-size: 0.9rem; text-decoration: none;">&larr; Back to all restrooms</a>
+          <h1 style="font-size: 1.5rem; margin: 0.75rem 0 0.25rem;">${r.name}</h1>
+          <p style="color: #718096; margin-bottom: 1rem;">${r.address}</p>
+
+          ${r.rating_count > 0 ? `
+            <div style="margin-bottom: 1rem;">
+              <div class="stars" style="font-size: 1.5rem;">${'★'.repeat(Math.round(r.avg_overall))}${'☆'.repeat(5 - Math.round(r.avg_overall))}</div>
+              <p style="color: #718096; font-size: 0.9rem;">${r.rating_count} rating${r.rating_count !== 1 ? 's' : ''}</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
+              <div class="card" style="text-align: center; background: #ebf8ff;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #2b6cb0;">${r.avg_cleanliness.toFixed(1)}</div>
+                <div style="font-size: 0.8rem; color: #718096;">Cleanliness</div>
+              </div>
+              <div class="card" style="text-align: center; background: #ebf8ff;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #2b6cb0;">${r.avg_accessibility.toFixed(1)}</div>
+                <div style="font-size: 0.8rem; color: #718096;">Accessibility</div>
+              </div>
+              <div class="card" style="text-align: center; background: #ebf8ff;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #2b6cb0;">${r.avg_amenities.toFixed(1)}</div>
+                <div style="font-size: 0.8rem; color: #718096;">Amenities</div>
+              </div>
+              <div class="card" style="text-align: center; background: #ebf8ff;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #2b6cb0;">${r.avg_overall.toFixed(1)}</div>
+                <div style="font-size: 0.8rem; color: #718096;">Overall</div>
+              </div>
+            </div>
+          ` : `
+            <p style="color: #a0aec0; margin-bottom: 1.5rem;">No ratings yet. Be the first!</p>
+          `}
+        </div>
+
+        <div class="card" style="margin-top: 1rem;">
+          <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Leave a Rating</h2>
+          <form id="rating-form">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem;">
+              <label>
+                Cleanliness (1-5)
+                <input type="number" name="cleanliness" min="1" max="5" required />
+              </label>
+              <label>
+                Accessibility (1-5)
+                <input type="number" name="accessibility" min="1" max="5" required />
+              </label>
+              <label>
+                Amenities (1-5)
+                <input type="number" name="amenities" min="1" max="5" required />
+              </label>
+              <label>
+                Overall (1-5)
+                <input type="number" name="overall" min="1" max="5" required />
+              </label>
+            </div>
+            <label>
+              Comment (optional)
+              <textarea name="comment" rows="3" placeholder="How was your experience?"></textarea>
+            </label>
+            <button type="submit" class="btn">Submit Rating</button>
+          </form>
+          <div id="rating-message" style="margin-top: 1rem;"></div>
+        </div>
+      `;
+
+      const ratingForm = document.getElementById('rating-form') as HTMLFormElement;
+      const ratingMsg = document.getElementById('rating-message')!;
+
+      ratingForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(ratingForm);
+
+        addRating({
+          restroom_id: restroomId!,
+          cleanliness: parseInt(fd.get('cleanliness') as string),
+          accessibility: parseInt(fd.get('accessibility') as string),
+          amenities: parseInt(fd.get('amenities') as string),
+          overall: parseInt(fd.get('overall') as string),
+          comment: fd.get('comment') as string,
+        });
+
+        ratingMsg.innerHTML = '<p style="color: #38a169;">Rating submitted!</p>';
+        setTimeout(() => renderDetail(), 600);
+      });
+    }
+  </script>
+</Layout>

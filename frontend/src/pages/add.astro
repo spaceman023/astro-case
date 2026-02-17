@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Add Restroom">
+  <h1 style="margin-bottom: 1.5rem; font-size: 1.75rem;">Add a Restroom</h1>
+
+  <div class="card">
+    <form id="add-form">
+      <label>
+        Name
+        <input type="text" name="name" placeholder="e.g. Central Park Public Restroom" required />
+      </label>
+      <label>
+        Address
+        <input type="text" name="address" placeholder="e.g. 123 Main St, New York, NY" required />
+      </label>
+      <label>
+        Latitude (optional)
+        <input type="number" name="latitude" step="any" placeholder="40.7128" />
+      </label>
+      <label>
+        Longitude (optional)
+        <input type="number" name="longitude" step="any" placeholder="-74.0060" />
+      </label>
+      <button type="submit" class="btn">Add Restroom</button>
+    </form>
+    <div id="form-message" style="margin-top: 1rem;"></div>
+  </div>
+
+  <script>
+    import { addRestroom, getBase } from '../scripts/store';
+
+    const base = getBase();
+    const form = document.getElementById('add-form') as HTMLFormElement;
+    const msg = document.getElementById('form-message')!;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+
+      const restroom = addRestroom({
+        name: data.get('name') as string,
+        address: data.get('address') as string,
+        latitude: parseFloat(data.get('latitude') as string) || 0,
+        longitude: parseFloat(data.get('longitude') as string) || 0,
+      });
+
+      msg.innerHTML = `<p style="color: #38a169;">Restroom added! <a href="${base}restroom?id=${restroom.id}" style="color: #2b6cb0;">View it &rarr;</a></p>`;
+      form.reset();
+    });
+  </script>
+</Layout>
