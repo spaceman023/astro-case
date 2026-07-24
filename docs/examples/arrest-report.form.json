@@ -1,0 +1,196 @@
+{
+  "id": "le.arrest_report",
+  "version": 7,
+  "title": "Arrest Report",
+  "domain": "le",
+  "entity": "le_incident",
+  "workflow": "le.report.standard",
+  "permissions": {
+    "editRoles": ["detective"],
+    "supervisorReview": ["le_supervisor"],
+    "viewRoles": ["detective", "le_supervisor", "ada", "da_supervisor"]
+  },
+  "sections": [
+    {
+      "id": "incident",
+      "title": "Incident",
+      "visibleWhen": null,
+      "fields": [
+        {
+          "id": "incidentNumber",
+          "type": "Text",
+          "label": "Incident Number",
+          "required": true,
+          "props": { "mono": true, "readOnlyAfterCreate": true }
+        },
+        {
+          "id": "occurredAt",
+          "type": "DateTime",
+          "label": "Date/Time Occurred",
+          "required": true,
+          "validation": { "kind": "notFuture" }
+        },
+        {
+          "id": "location",
+          "type": "AddressEditor",
+          "label": "Location of Occurrence",
+          "required": true,
+          "props": { "geocode": true }
+        },
+        {
+          "id": "reportingOfficer",
+          "type": "OfficerSelector",
+          "label": "Reporting Officer",
+          "required": true,
+          "validation": { "kind": "reference", "entity": "person", "role": "officer" },
+          "props": { "agencyScoped": true, "defaultToCurrentUser": true }
+        }
+      ]
+    },
+    {
+      "id": "arrest",
+      "title": "Arrest",
+      "visibleWhen": null,
+      "fields": [
+        {
+          "id": "wasArrestMade",
+          "type": "Boolean",
+          "label": "Was an arrest made?",
+          "required": true
+        },
+        {
+          "id": "arrestee",
+          "type": "PersonSelector",
+          "label": "Arrestee",
+          "required": true,
+          "visibleWhen": { "op": "eq", "field": "wasArrestMade", "value": true },
+          "validation": { "kind": "reference", "entity": "person", "role": "defendant" },
+          "props": { "createsParty": true, "dedupeAware": true }
+        },
+        {
+          "id": "arrestingOfficer",
+          "type": "OfficerSelector",
+          "label": "Arresting Officer",
+          "required": true,
+          "visibleWhen": { "op": "eq", "field": "wasArrestMade", "value": true },
+          "validation": { "kind": "reference", "entity": "person", "role": "officer" },
+          "props": { "agencyScoped": true }
+        },
+        {
+          "id": "arrestAt",
+          "type": "DateTime",
+          "label": "Date/Time of Arrest",
+          "required": true,
+          "visibleWhen": { "op": "eq", "field": "wasArrestMade", "value": true }
+        }
+      ]
+    },
+    {
+      "id": "charges",
+      "title": "Booking Charges",
+      "visibleWhen": { "op": "eq", "field": "wasArrestMade", "value": true },
+      "fields": [
+        {
+          "id": "charges",
+          "type": "ChargeGrid",
+          "label": "Charges",
+          "required": true,
+          "props": { "statuteEffectiveOnField": "occurredAt", "minRows": 1 }
+        }
+      ]
+    },
+    {
+      "id": "witnesses",
+      "title": "Witnesses",
+      "repeatable": { "min": 0, "max": 50, "itemLabel": "Witness {{index}}" },
+      "fields": [
+        {
+          "id": "person",
+          "type": "PersonSelector",
+          "label": "Witness",
+          "required": true,
+          "validation": { "kind": "reference", "entity": "person", "role": "witness" },
+          "props": { "createsParty": true, "dedupeAware": true }
+        },
+        {
+          "id": "statement",
+          "type": "TextArea",
+          "label": "Statement Summary",
+          "required": false,
+          "props": { "rows": 3 }
+        }
+      ]
+    },
+    {
+      "id": "evidence",
+      "title": "Evidence",
+      "repeatable": { "min": 0, "max": 200, "itemLabel": "Item {{index}}" },
+      "fields": [
+        {
+          "id": "item",
+          "type": "EvidencePicker",
+          "label": "Evidence Item",
+          "required": true,
+          "props": { "allowCreate": true }
+        }
+      ]
+    },
+    {
+      "id": "narrative",
+      "title": "Narrative",
+      "fields": [
+        {
+          "id": "narrative",
+          "type": "RichTextField",
+          "label": "Incident Narrative",
+          "required": true,
+          "permissions": { "editRoles": ["detective"], "viewRoles": ["*"] },
+          "props": { "editor": "tiptap", "toolbar": "legal" }
+        }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "title": "Supervisor Review",
+      "permissions": { "editRoles": ["le_supervisor"], "viewRoles": ["*"] },
+      "fields": [
+        {
+          "id": "supervisorApproved",
+          "type": "Boolean",
+          "label": "Approved for submission to DA",
+          "required": false
+        },
+        {
+          "id": "supervisorNotes",
+          "type": "TextArea",
+          "label": "Review Notes",
+          "required": false,
+          "visibleWhen": { "op": "eq", "field": "supervisorApproved", "value": false }
+        }
+      ]
+    }
+  ],
+  "crossFieldRules": [
+    {
+      "id": "arrestRequiresCharge",
+      "when": { "op": "eq", "field": "wasArrestMade", "value": true },
+      "assert": { "op": "gt", "field": "charges.length", "value": 0 },
+      "message": "An arrest must have at least one booking charge."
+    },
+    {
+      "id": "arrestAtAfterOccurred",
+      "when": { "op": "eq", "field": "wasArrestMade", "value": true },
+      "assert": { "op": "gte", "field": "arrestAt", "valueField": "occurredAt" },
+      "message": "Arrest time cannot precede the time the incident occurred."
+    }
+  ],
+  "migrations": [
+    {
+      "toVersion": 7,
+      "ops": [
+        { "op": "rename", "from": "primaryOfficer", "to": "reportingOfficer" },
+        { "op": "addWithDefault", "field": "occurredAt", "default": null }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,622 @@
+/* =============================================================================
+   Unified Justice Suite — Global Theme Engine
+   -----------------------------------------------------------------------------
+   - shadcn/ui-compatible token names (--background, --foreground, --primary, …)
+   - DARK-FIRST: :root IS the default (dark) theme. Light is opt-in.
+   - Compact / data-dense by default; opt into [data-density="comfortable"].
+   - Many alternate themes via [data-theme="…"] — override color tokens only.
+   - Colors are authored in OKLCH for perceptual consistency across themes.
+
+   Switching:
+     <html data-theme="light">                     // named color theme
+     <html data-theme="amber" data-density="comfortable">
+     (no attribute) => default dark "graphite" theme, compact density.
+
+   Tailwind v4: the @theme inline block near the bottom maps these CSS vars to
+   Tailwind color/spacing utilities (bg-background, text-foreground, …).
+   Tailwind v3: consume the same vars via hsl()/oklch() in tailwind.config.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   1. DENSITY, TYPOGRAPHY, RADIUS, ELEVATION (theme-independent structural scale)
+   These control how *compact* the UI is, independent of color theme.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Type scale — tuned small for data density (base = 13px). */
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code",
+    Menlo, Consolas, monospace;
+
+  --text-2xs: 0.625rem;   /* 10px — dense table meta, chips */
+  --text-xs: 0.6875rem;   /* 11px — secondary/table cells */
+  --text-sm: 0.75rem;     /* 12px — controls, labels */
+  --text-base: 0.8125rem; /* 13px — body default */
+  --text-md: 0.875rem;    /* 14px — emphasized body */
+  --text-lg: 1rem;        /* 16px — section titles */
+  --text-xl: 1.25rem;     /* 20px — page titles */
+  --text-2xl: 1.5rem;     /* 24px — rare, dashboards */
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.4;
+  --leading-relaxed: 1.55;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* 4px base spacing grid — compact. */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-1: 0.25rem;  /* 4  */
+  --space-2: 0.375rem; /* 6  */
+  --space-3: 0.5rem;   /* 8  */
+  --space-4: 0.75rem;  /* 12 */
+  --space-5: 1rem;     /* 16 */
+  --space-6: 1.5rem;   /* 24 */
+  --space-8: 2rem;     /* 32 */
+
+  /* Interactive sizing — COMPACT defaults (data-dense first). */
+  --control-h: 1.75rem;   /* 28px inputs/buttons/selects */
+  --control-h-sm: 1.5rem; /* 24px inline/table controls */
+  --control-h-lg: 2.25rem;/* 36px primary CTAs */
+  --row-h: 1.875rem;      /* 30px table row */
+  --field-gap: var(--space-3);
+  --control-px: var(--space-3);
+
+  /* Radius — small for a crisp, dense look. */
+  --radius: 0.375rem;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-full: 9999px;
+
+  /* Borders — hairlines carry structure in dense layouts. */
+  --border-width: 1px;
+
+  /* Elevation — subtle in dark; overridden per theme where needed. */
+  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.35);
+  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.4), 0 1px 2px -1px oklch(0 0 0 / 0.4);
+  --shadow-md: 0 4px 12px -2px oklch(0 0 0 / 0.45);
+  --shadow-lg: 0 12px 32px -8px oklch(0 0 0 / 0.55);
+
+  /* Focus ring width — visible even in dense grids (a11y). */
+  --ring-width: 2px;
+
+  /* Motion — minimal; respect reduced-motion below. */
+  --motion-fast: 90ms;
+  --motion-base: 140ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Comfortable density — loosens spacing/heights without touching color. */
+[data-density="comfortable"] {
+  --text-base: 0.875rem;  /* 14px */
+  --text-sm: 0.8125rem;   /* 13px */
+  --control-h: 2.25rem;   /* 36px */
+  --control-h-sm: 2rem;
+  --control-h-lg: 2.5rem;
+  --row-h: 2.5rem;
+  --field-gap: var(--space-5);
+  --control-px: var(--space-4);
+  --radius: 0.5rem;
+}
+
+/* Ultra-compact — for evidence logs, docket grids, power users. */
+[data-density="compact"] {
+  --text-base: 0.75rem;   /* 12px */
+  --text-sm: 0.6875rem;
+  --control-h: 1.5rem;
+  --row-h: 1.625rem;      /* 26px */
+  --field-gap: var(--space-2);
+  --control-px: var(--space-2);
+}
+
+/* -----------------------------------------------------------------------------
+   2. COLOR TOKENS — semantic, shadcn-compatible.
+   :root == DEFAULT DARK THEME ("graphite"). Alternate themes override below.
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  --background: oklch(0.165 0.006 255);
+  --foreground: oklch(0.925 0.006 255);
+
+  --card: oklch(0.198 0.007 255);
+  --card-foreground: oklch(0.93 0.006 255);
+
+  --popover: oklch(0.205 0.008 255);
+  --popover-foreground: oklch(0.94 0.006 255);
+
+  --primary: oklch(0.62 0.16 255);
+  --primary-foreground: oklch(0.98 0.01 255);
+
+  --secondary: oklch(0.27 0.008 255);
+  --secondary-foreground: oklch(0.92 0.006 255);
+
+  --muted: oklch(0.245 0.007 255);
+  --muted-foreground: oklch(0.66 0.012 255);
+
+  --accent: oklch(0.30 0.02 255);
+  --accent-foreground: oklch(0.96 0.006 255);
+
+  /* Status / semantic — used by badges, workflow states, validation. */
+  --destructive: oklch(0.62 0.20 25);
+  --destructive-foreground: oklch(0.98 0.01 25);
+  --success: oklch(0.68 0.14 150);
+  --success-foreground: oklch(0.16 0.02 150);
+  --warning: oklch(0.78 0.15 80);
+  --warning-foreground: oklch(0.20 0.03 80);
+  --info: oklch(0.68 0.12 230);
+  --info-foreground: oklch(0.16 0.02 230);
+
+  --border: oklch(0.28 0.008 255);
+  --input: oklch(0.30 0.009 255);
+  --ring: oklch(0.62 0.16 255);
+
+  /* Data-viz categorical ramp (TanStack/Recharts). */
+  --chart-1: oklch(0.62 0.16 255);
+  --chart-2: oklch(0.70 0.14 165);
+  --chart-3: oklch(0.78 0.15 80);
+  --chart-4: oklch(0.66 0.19 320);
+  --chart-5: oklch(0.64 0.18 25);
+
+  /* App shell / navigation surfaces. */
+  --sidebar: oklch(0.145 0.006 255);
+  --sidebar-foreground: oklch(0.88 0.006 255);
+  --sidebar-primary: oklch(0.62 0.16 255);
+  --sidebar-primary-foreground: oklch(0.98 0.01 255);
+  --sidebar-accent: oklch(0.24 0.008 255);
+  --sidebar-accent-foreground: oklch(0.94 0.006 255);
+  --sidebar-border: oklch(0.24 0.008 255);
+  --sidebar-ring: oklch(0.62 0.16 255);
+
+  /* Selection & code surfaces. */
+  --selection: oklch(0.62 0.16 255 / 0.35);
+}
+
+/* ---- LIGHT: "paper" ------------------------------------------------------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --background: oklch(0.985 0.002 255);
+  --foreground: oklch(0.22 0.01 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.01 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.01 255);
+  --primary: oklch(0.52 0.17 255);
+  --primary-foreground: oklch(0.99 0.005 255);
+  --secondary: oklch(0.95 0.004 255);
+  --secondary-foreground: oklch(0.28 0.01 255);
+  --muted: oklch(0.955 0.004 255);
+  --muted-foreground: oklch(0.50 0.012 255);
+  --accent: oklch(0.93 0.02 255);
+  --accent-foreground: oklch(0.25 0.02 255);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.99 0.01 25);
+  --success: oklch(0.55 0.14 150);
+  --success-foreground: oklch(0.99 0.01 150);
+  --warning: oklch(0.68 0.15 75);
+  --warning-foreground: oklch(0.22 0.03 75);
+  --info: oklch(0.55 0.13 230);
+  --info-foreground: oklch(0.99 0.01 230);
+  --border: oklch(0.90 0.004 255);
+  --input: oklch(0.88 0.005 255);
+  --ring: oklch(0.52 0.17 255);
+  --chart-1: oklch(0.52 0.17 255);
+  --chart-2: oklch(0.58 0.14 165);
+  --chart-3: oklch(0.66 0.16 70);
+  --chart-4: oklch(0.55 0.19 320);
+  --chart-5: oklch(0.55 0.20 25);
+  --sidebar: oklch(0.97 0.003 255);
+  --sidebar-foreground: oklch(0.26 0.01 255);
+  --sidebar-primary: oklch(0.52 0.17 255);
+  --sidebar-primary-foreground: oklch(0.99 0.005 255);
+  --sidebar-accent: oklch(0.93 0.006 255);
+  --sidebar-accent-foreground: oklch(0.26 0.01 255);
+  --sidebar-border: oklch(0.90 0.004 255);
+  --sidebar-ring: oklch(0.52 0.17 255);
+  --selection: oklch(0.52 0.17 255 / 0.18);
+  --shadow-xs: 0 1px 2px 0 oklch(0 0 0 / 0.06);
+  --shadow-sm: 0 1px 3px 0 oklch(0 0 0 / 0.10), 0 1px 2px -1px oklch(0 0 0 / 0.08);
+  --shadow-md: 0 4px 12px -2px oklch(0 0 0 / 0.12);
+  --shadow-lg: 0 12px 32px -8px oklch(0 0 0 / 0.18);
+}
+
+/* ---- DARK: "midnight" (deep blue) ---------------------------------------- */
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --background: oklch(0.14 0.03 265);
+  --foreground: oklch(0.92 0.02 265);
+  --card: oklch(0.18 0.035 265);
+  --card-foreground: oklch(0.93 0.02 265);
+  --popover: oklch(0.19 0.038 265);
+  --popover-foreground: oklch(0.94 0.02 265);
+  --primary: oklch(0.66 0.16 260);
+  --primary-foreground: oklch(0.99 0.01 260);
+  --secondary: oklch(0.26 0.04 265);
+  --secondary-foreground: oklch(0.92 0.02 265);
+  --muted: oklch(0.23 0.035 265);
+  --muted-foreground: oklch(0.68 0.03 265);
+  --accent: oklch(0.30 0.05 265);
+  --accent-foreground: oklch(0.96 0.02 265);
+  --destructive: oklch(0.62 0.20 20);
+  --destructive-foreground: oklch(0.98 0.01 20);
+  --success: oklch(0.70 0.14 155);
+  --success-foreground: oklch(0.15 0.02 155);
+  --warning: oklch(0.80 0.14 85);
+  --warning-foreground: oklch(0.18 0.03 85);
+  --info: oklch(0.70 0.12 235);
+  --info-foreground: oklch(0.15 0.02 235);
+  --border: oklch(0.28 0.04 265);
+  --input: oklch(0.30 0.045 265);
+  --ring: oklch(0.66 0.16 260);
+  --chart-1: oklch(0.66 0.16 260);
+  --chart-2: oklch(0.72 0.14 175);
+  --chart-3: oklch(0.80 0.15 90);
+  --chart-4: oklch(0.68 0.19 320);
+  --chart-5: oklch(0.66 0.18 25);
+  --sidebar: oklch(0.115 0.03 265);
+  --sidebar-foreground: oklch(0.88 0.02 265);
+  --sidebar-primary: oklch(0.66 0.16 260);
+  --sidebar-primary-foreground: oklch(0.99 0.01 260);
+  --sidebar-accent: oklch(0.24 0.04 265);
+  --sidebar-accent-foreground: oklch(0.94 0.02 265);
+  --sidebar-border: oklch(0.24 0.04 265);
+  --sidebar-ring: oklch(0.66 0.16 260);
+  --selection: oklch(0.66 0.16 260 / 0.35);
+}
+
+/* ---- DARK: "nord" (cool slate/teal) -------------------------------------- */
+[data-theme="nord"] {
+  color-scheme: dark;
+  --background: oklch(0.20 0.02 250);
+  --foreground: oklch(0.90 0.01 250);
+  --card: oklch(0.24 0.02 250);
+  --card-foreground: oklch(0.91 0.01 250);
+  --popover: oklch(0.25 0.022 250);
+  --popover-foreground: oklch(0.92 0.01 250);
+  --primary: oklch(0.70 0.09 220);
+  --primary-foreground: oklch(0.16 0.02 220);
+  --secondary: oklch(0.30 0.02 250);
+  --secondary-foreground: oklch(0.90 0.01 250);
+  --muted: oklch(0.28 0.02 250);
+  --muted-foreground: oklch(0.70 0.015 250);
+  --accent: oklch(0.34 0.03 220);
+  --accent-foreground: oklch(0.95 0.01 250);
+  --destructive: oklch(0.63 0.16 20);
+  --destructive-foreground: oklch(0.98 0.01 20);
+  --success: oklch(0.74 0.10 155);
+  --success-foreground: oklch(0.18 0.02 155);
+  --warning: oklch(0.80 0.11 85);
+  --warning-foreground: oklch(0.20 0.03 85);
+  --info: oklch(0.72 0.09 220);
+  --info-foreground: oklch(0.16 0.02 220);
+  --border: oklch(0.32 0.02 250);
+  --input: oklch(0.34 0.022 250);
+  --ring: oklch(0.70 0.09 220);
+  --chart-1: oklch(0.70 0.09 220);
+  --chart-2: oklch(0.74 0.10 175);
+  --chart-3: oklch(0.80 0.10 90);
+  --chart-4: oklch(0.70 0.12 320);
+  --chart-5: oklch(0.68 0.14 25);
+  --sidebar: oklch(0.17 0.02 250);
+  --sidebar-foreground: oklch(0.88 0.01 250);
+  --sidebar-primary: oklch(0.70 0.09 220);
+  --sidebar-primary-foreground: oklch(0.16 0.02 220);
+  --sidebar-accent: oklch(0.28 0.02 250);
+  --sidebar-accent-foreground: oklch(0.93 0.01 250);
+  --sidebar-border: oklch(0.28 0.02 250);
+  --sidebar-ring: oklch(0.70 0.09 220);
+  --selection: oklch(0.70 0.09 220 / 0.35);
+}
+
+/* ---- DARK: "amber" (night-shift / terminal warmth) ----------------------- */
+[data-theme="amber"] {
+  color-scheme: dark;
+  --background: oklch(0.15 0.008 60);
+  --foreground: oklch(0.90 0.03 75);
+  --card: oklch(0.185 0.01 60);
+  --card-foreground: oklch(0.91 0.03 75);
+  --popover: oklch(0.195 0.012 60);
+  --popover-foreground: oklch(0.92 0.03 75);
+  --primary: oklch(0.78 0.15 70);
+  --primary-foreground: oklch(0.18 0.03 70);
+  --secondary: oklch(0.26 0.015 60);
+  --secondary-foreground: oklch(0.90 0.03 75);
+  --muted: oklch(0.23 0.012 60);
+  --muted-foreground: oklch(0.68 0.03 70);
+  --accent: oklch(0.32 0.04 70);
+  --accent-foreground: oklch(0.95 0.03 75);
+  --destructive: oklch(0.62 0.20 25);
+  --destructive-foreground: oklch(0.98 0.01 25);
+  --success: oklch(0.72 0.14 140);
+  --success-foreground: oklch(0.16 0.02 140);
+  --warning: oklch(0.80 0.15 85);
+  --warning-foreground: oklch(0.18 0.03 85);
+  --info: oklch(0.72 0.10 210);
+  --info-foreground: oklch(0.15 0.02 210);
+  --border: oklch(0.29 0.015 60);
+  --input: oklch(0.31 0.018 60);
+  --ring: oklch(0.78 0.15 70);
+  --chart-1: oklch(0.78 0.15 70);
+  --chart-2: oklch(0.74 0.13 130);
+  --chart-3: oklch(0.82 0.13 95);
+  --chart-4: oklch(0.68 0.16 40);
+  --chart-5: oklch(0.70 0.12 200);
+  --sidebar: oklch(0.13 0.008 60);
+  --sidebar-foreground: oklch(0.88 0.03 75);
+  --sidebar-primary: oklch(0.78 0.15 70);
+  --sidebar-primary-foreground: oklch(0.18 0.03 70);
+  --sidebar-accent: oklch(0.24 0.015 60);
+  --sidebar-accent-foreground: oklch(0.93 0.03 75);
+  --sidebar-border: oklch(0.24 0.015 60);
+  --sidebar-ring: oklch(0.78 0.15 70);
+  --selection: oklch(0.78 0.15 70 / 0.30);
+}
+
+/* ---- "high-contrast" (accessibility; dark base, max legibility) ---------- */
+[data-theme="high-contrast"] {
+  color-scheme: dark;
+  --background: oklch(0.10 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.14 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.14 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(0.80 0.18 250);
+  --primary-foreground: oklch(0.08 0 0);
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.20 0 0);
+  --muted-foreground: oklch(0.82 0 0);
+  --accent: oklch(0.30 0 0);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.70 0.22 25);
+  --destructive-foreground: oklch(0.08 0 0);
+  --success: oklch(0.80 0.18 150);
+  --success-foreground: oklch(0.08 0 0);
+  --warning: oklch(0.88 0.17 90);
+  --warning-foreground: oklch(0.08 0 0);
+  --info: oklch(0.80 0.15 230);
+  --info-foreground: oklch(0.08 0 0);
+  --border: oklch(0.55 0 0);   /* strong hairlines */
+  --input: oklch(0.60 0 0);
+  --ring: oklch(0.90 0.16 250);
+  --ring-width: 3px;
+  --chart-1: oklch(0.80 0.18 250);
+  --chart-2: oklch(0.82 0.18 150);
+  --chart-3: oklch(0.88 0.17 90);
+  --chart-4: oklch(0.78 0.20 320);
+  --chart-5: oklch(0.78 0.20 25);
+  --sidebar: oklch(0.08 0 0);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.80 0.18 250);
+  --sidebar-primary-foreground: oklch(0.08 0 0);
+  --sidebar-accent: oklch(0.22 0 0);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.55 0 0);
+  --sidebar-ring: oklch(0.90 0.16 250);
+  --selection: oklch(0.80 0.18 250 / 0.45);
+}
+
+/* Optional: follow the OS when no explicit theme is chosen and the app opts in
+   with <html data-theme="system">. Dark-first, so only the light branch flips. */
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] {
+    color-scheme: light;
+    --background: oklch(0.985 0.002 255);
+    --foreground: oklch(0.22 0.01 255);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.22 0.01 255);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.22 0.01 255);
+    --primary: oklch(0.52 0.17 255);
+    --primary-foreground: oklch(0.99 0.005 255);
+    --secondary: oklch(0.95 0.004 255);
+    --secondary-foreground: oklch(0.28 0.01 255);
+    --muted: oklch(0.955 0.004 255);
+    --muted-foreground: oklch(0.50 0.012 255);
+    --accent: oklch(0.93 0.02 255);
+    --accent-foreground: oklch(0.25 0.02 255);
+    --border: oklch(0.90 0.004 255);
+    --input: oklch(0.88 0.005 255);
+    --ring: oklch(0.52 0.17 255);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   3. BASE ELEMENT STYLES (consume tokens; keep it minimal — components own the rest)
+   -------------------------------------------------------------------------- */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    font-weight: var(--weight-normal);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numeric data reads cleaner with lining, tabular figures. */
+  table,
+  [data-numeric],
+  .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+  }
+
+  ::selection {
+    background: var(--selection);
+  }
+
+  /* Visible, consistent focus ring everywhere — essential in dense grids. */
+  :focus-visible {
+    outline: var(--ring-width) solid var(--ring);
+    outline-offset: 1px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Slim, theme-aware scrollbars for dense scroll regions. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: var(--radius-full);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   4. DENSITY UTILITIES for data tables / grids (used by TanStack Table wrappers)
+   -------------------------------------------------------------------------- */
+@layer components {
+  .data-grid {
+    font-size: var(--text-xs);
+    line-height: var(--leading-tight);
+    border-color: var(--border);
+  }
+  .data-grid th {
+    height: var(--row-h);
+    padding: 0 var(--space-3);
+    text-align: left;
+    font-weight: var(--weight-semibold);
+    color: var(--muted-foreground);
+    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-bottom: var(--border-width) solid var(--border);
+    white-space: nowrap;
+  }
+  .data-grid td {
+    height: var(--row-h);
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-width) solid var(--border);
+  }
+  .data-grid tbody tr:hover {
+    background: var(--accent);
+  }
+  .data-grid tbody tr[data-selected="true"] {
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+  }
+
+  /* Status pill — maps a workflow/validation state to a semantic token. */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 1.125rem;
+    padding: 0 var(--space-2);
+    font-size: var(--text-2xs);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    border-radius: var(--radius-sm);
+    border: var(--border-width) solid transparent;
+  }
+  .status--draft    { color: var(--muted-foreground); background: var(--muted); }
+  .status--review   { color: var(--warning);  background: color-mix(in oklch, var(--warning) 16%, transparent); }
+  .status--approved { color: var(--success);  background: color-mix(in oklch, var(--success) 16%, transparent); }
+  .status--filed    { color: var(--info);     background: color-mix(in oklch, var(--info) 16%, transparent); }
+  .status--rejected { color: var(--destructive); background: color-mix(in oklch, var(--destructive) 16%, transparent); }
+}
+
+/* -----------------------------------------------------------------------------
+   5. REDUCED MOTION
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   6. TAILWIND v4 BRIDGE
+   Maps the semantic CSS vars above to Tailwind utility classes.
+   (Tailwind v4 only — plain browsers ignore the unknown @theme at-rule.
+    On Tailwind v3, reference these vars from tailwind.config.ts instead.)
+   -------------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+}
