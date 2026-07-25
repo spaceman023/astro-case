@@ -5,8 +5,31 @@ A unified **Law Enforcement + Prosecution + Courts** management suite built arou
 enforcement, flows to prosecution, and to the courts, with the people, charges, and
 evidence shared **by reference**, never re-keyed.
 
-> **Status:** Specification phase. This repository currently contains the architecture
-> and design specs — no application code yet.
+> **Status:** Early foundation. The architecture and design specs are in place, and the
+> Turborepo/pnpm monorepo is scaffolded with a working `packages/ui` theme engine and a
+> `apps/web` Next.js app that demonstrates it. Domain modules and the form engine are next.
+
+## Monorepo layout
+
+```
+apps/web              # Next.js 15 (App Router, React 19) — demo shell wired to the theme engine
+packages/ui           # design system: theme engine (globals.css), tokenized shadcn-style
+                      # primitives (Button, Input, Badge, Card, DataTable), theme/density switcher
+tsconfig.base.json    # shared TS config       turbo.json / pnpm-workspace.yaml
+```
+
+Planned packages (see [docs/SPEC.md](docs/SPEC.md) §3): `db`, `schema`, `auth`, `form-engine`,
+`form-controls`, `audit`, `workflow`, `storage`, `rich-text`, `core-domain`, and `domain-*`.
+
+## Development
+
+```bash
+pnpm install
+pnpm dev          # run apps/web (turbo)
+pnpm build        # build all packages + typecheck
+```
+
+Requires Node ≥ 20 and pnpm 10.
 
 ## Documentation
 

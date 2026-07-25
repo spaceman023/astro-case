@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Theme engine: semantic tokens, dark-first defaults, density modes, alternate
+   themes, base element styles, and the Tailwind v4 @theme inline bridge. */
+@import "@justice/ui/styles/globals.css";
+
+/* Tailwind must scan the UI package source so its utility classes are generated. */
+@source "../../../packages/ui/src";
