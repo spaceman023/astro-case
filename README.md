@@ -15,11 +15,16 @@ evidence shared **by reference**, never re-keyed.
 apps/web              # Next.js 15 (App Router, React 19) — demo shell wired to the theme engine
 packages/ui           # design system: theme engine (globals.css), tokenized shadcn-style
                       # primitives (Button, Input, Badge, Card, DataTable), theme/density switcher
+packages/db           # Drizzle canonical core schema (SPEC §4): Case spine, Person registry,
+                      # parties, statutes/charges, evidence, documents, audit, workflow, form storage
 tsconfig.base.json    # shared TS config       turbo.json / pnpm-workspace.yaml
 ```
 
-Planned packages (see [docs/SPEC.md](docs/SPEC.md) §3): `db`, `schema`, `auth`, `form-engine`,
-`form-controls`, `audit`, `workflow`, `storage`, `rich-text`, `core-domain`, and `domain-*`.
+Planned packages (see [docs/SPEC.md](docs/SPEC.md) §3): `schema`, `auth`, `form-engine`,
+`form-controls`, `workflow`, `storage`, `rich-text`, `core-domain`, and `domain-*`.
+
+The `db` schema generates SQL migrations offline (no DB needed) with
+`pnpm --filter @justice/db db:generate`; apply them with `db:migrate` against a `DATABASE_URL`.
 
 ## Development
 
